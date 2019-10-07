@@ -60,7 +60,6 @@ func main() {
 				fmt.Println(err.Error())
 			}
 			if created.Before(time.Now().UTC().Add(-WaitDuration)) {
-				fmt.Print(". ")
 				continue
 			}
 			for _, p := range participants {
