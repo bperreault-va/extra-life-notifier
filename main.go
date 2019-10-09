@@ -11,25 +11,40 @@ import (
 )
 
 const (
-	GetParticipantsURL                   = "https://extra-life.org/api/teams/44172/participants"
-	GetDonationsURL                      = "https://extra-life.org/api/teams/44172/donations?limit=5"
-	SlackWebhookURL                      = "https://hooks.slack.com/services/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"
-	SlacktivityTemplate                  = "%s just received a $%.2f donation from %s!"
-	SlacktivityAdditionalMessageTemplate = "\n> %s"
-	ParticipantSlacktivityTemplate       = "%s joined the team!"
-	TimeLayout                           = "2006-01-02T15:04:05"
-	WaitDuration                         = 60 * time.Second
+	GetTeamURL                                   = "https://extra-life.org/api/teams/44172"
+	GetParticipantsURL                           = "https://extra-life.org/api/teams/44172/participants"
+	GetDonationsURL                              = "https://extra-life.org/api/teams/44172/donations?limit=5"
+	SlackWebhookURL                              = "https://hooks.slack.com/services/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"
+	DonationSlacktivityTemplate                  = "%s just received a $%.2f donation from %s!"
+	DonationSlacktivityAdditionalMessageTemplate = "\n> %s"
+	DonationSlacktivityTotalTemplate             = "\nNew team total: $%.2f"
+	ParticipantSlacktivityTemplate               = "%s joined the team!"
+	TimeLayout                                   = "2006-01-02T15:04:05"
+	WaitDuration                                 = 60 * time.Second
 )
 
 func main() {
 	// Hello world
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, "Hello Extra Life!")
+		_, err := w.Write([]byte("Hello Extra Life!"))
+		if err != nil {
+			fmt.Println(err.Error())
+		}
 	})
 	// Health check
 	http.HandleFunc("/_ah/health", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, "ok")
+		_, err := w.Write([]byte("ok"))
+		if err != nil {
+			fmt.Println(err.Error())
+		}
 	})
+
+	go func() {
+		err := http.ListenAndServe(":8080", nil)
+		if err != nil {
+			panic(err.Error())
+		}
+	}()
 
 	var participants []Participant
 	var err error
@@ -64,7 +79,12 @@ func main() {
 			}
 			for _, p := range participants {
 				if p.ParticipantID == donation.ParticipantID {
-					err = SendDonationSlacktivity(donation, p)
+					team, err := GetTeam()
+					if err != nil {
+						fmt.Println(err.Error())
+					}
+
+					err = SendDonationSlacktivity(team, donation, p)
 					if err != nil {
 						fmt.Println(err.Error())
 					}
@@ -73,6 +93,30 @@ func main() {
 		}
 		time.Sleep(WaitDuration)
 	}
+}
+
+type Team struct {
+	FundraisingGoal float64 `json:"fundraisingGoal"`
+	SumDonations    float64 `json:"sumDonations"`
+}
+
+func GetTeam() (Team, error) {
+	resp, err := http.Get(GetTeamURL)
+	if err != nil {
+		return Team{}, err
+	}
+	defer resp.Body.Close()
+	response, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return Team{}, err
+	}
+
+	var team Team
+	err = json.Unmarshal([]byte(response), &team)
+	if err != nil {
+		return Team{}, err
+	}
+	return team, nil
 }
 
 type Participant struct {
@@ -129,11 +173,13 @@ type Slacktivity struct {
 	Text string `json:"text"`
 }
 
-func SendDonationSlacktivity(donation Donation, participant Participant) error {
-	message := fmt.Sprintf(SlacktivityTemplate, participant.DisplayName, donation.Amount, donation.DisplayName)
+func SendDonationSlacktivity(team Team, donation Donation, participant Participant) error {
+	message := fmt.Sprintf(DonationSlacktivityTemplate, participant.DisplayName, donation.Amount, donation.DisplayName)
 	if donation.Message != "" {
-		message += fmt.Sprintf(SlacktivityAdditionalMessageTemplate, donation.Message)
+		message += fmt.Sprintf(DonationSlacktivityAdditionalMessageTemplate, donation.Message)
 	}
+	message += fmt.Sprintf(DonationSlacktivityTotalTemplate, team.SumDonations)
+
 	fmt.Println(message)
 	slacktivity := Slacktivity{Text: message}
 	payload, err := json.Marshal(slacktivity)
