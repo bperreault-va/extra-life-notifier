@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/bperreault-va/extra-life-slack-notifier/discord"
+	"github.com/bperreault-va/extra-life-slack-notifier/extralife"
 	"github.com/bperreault-va/extra-life-slack-notifier/slack"
 	"net/http"
 )
@@ -11,7 +13,10 @@ func main() {
 	handleHTTP()
 
 	fmt.Println("Starting Slack server...")
-	s := slack.New("44172", "https://hooks.slack.com/services/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")
+
+	slackService := slack.New("https://hooks.slack.com/services/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")
+	discordService := discord.New("https://discordapp.com/api/webhooks/632072354436218880/tAFR4RkKu5KSZ62Wu83Oh0MV1HkzDUsPvS6TsR-50fl59UECcx7Bwrkl8Mw8jNC6O9KN")
+	s := extralife.New("44339", slackService, discordService)
 	s.PollExtraLife()
 }
 
