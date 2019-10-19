@@ -3,8 +3,8 @@ package extralife
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/bperreault-va/extra-life-slack-notifier/discord"
-	"github.com/bperreault-va/extra-life-slack-notifier/slack"
+	"github.com/bperreault-va/extra-life-notifier/discord"
+	"github.com/bperreault-va/extra-life-notifier/slack"
 	"io/ioutil"
 	"net/http"
 	"strings"

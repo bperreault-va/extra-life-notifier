@@ -1,1 +1,1 @@
-# extra-life-slack-notifier
+# extra-life-notifier
