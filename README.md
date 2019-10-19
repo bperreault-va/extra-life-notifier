@@ -9,11 +9,11 @@ Run an executable file for your system. Supports:
 - darwin/amd64
 
 Find your Extra Life Team ID in the URL of your Team Page
-![](here)
+![](https://onedrive.live.com/?cid=3FBCB393D0B4A719&id=3FBCB393D0B4A719%21638&parId=root&o=OneUp)
 
-Follow the instructions in (this article)[https://slack.com/intl/en-ca/help/articles/115005265063-incoming-webhooks-for-slack] to create a Slack Incoming Webhook URL.
+Follow the instructions in [this article](https://slack.com/intl/en-ca/help/articles/115005265063-incoming-webhooks-for-slack) to create a Slack Incoming Webhook URL.
 
-Follow the instructions in (this article)[https://support.discordapp.com/hc/en-us/articles/228383668-Intro-to-Webhooks] to create a Discord Webhook URL.
+Follow the instructions in [this article](https://support.discordapp.com/hc/en-us/articles/228383668-Intro-to-Webhooks) to create a Discord Webhook URL.
 
 After adding either Slack or Discord, choose "Start server". A short message will be sent to your webhook URLs to test them. If everything looks good, then new donations and participants will trigger a ping to your app!
 
