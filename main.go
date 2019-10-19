@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/bperreault-va/extra-life-slack-notifier/discord"
-	"github.com/bperreault-va/extra-life-slack-notifier/extralife"
-	"github.com/bperreault-va/extra-life-slack-notifier/slack"
+	"github.com/bperreault-va/extra-life-notifier/discord"
+	"github.com/bperreault-va/extra-life-notifier/extralife"
+	"github.com/bperreault-va/extra-life-notifier/slack"
 	"net/http"
 )
 
