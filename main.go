@@ -12,11 +12,16 @@ func main() {
 	fmt.Println("Starting HTTP server...")
 	handleHTTP()
 
-	fmt.Println("Starting Slack server...")
 
-	slackService := slack.New("")
-	discordService := discord.New("")
-	s := extralife.New("", slackService, discordService)
+	teamID := "CHANGE ME"
+	slackWebhookURL := "CHANGE ME OR LEAVE BLANK"
+	discordWebhookURL := "CHANGE ME OR LEAVE BLANK"
+
+	slackService := slack.New(slackWebhookURL)
+	discordService := discord.New(discordWebhookURL)
+	s := extralife.New(teamID, slackService, discordService)
+
+	fmt.Println("Starting Slack server...")
 	s.PollExtraLife()
 }
 
