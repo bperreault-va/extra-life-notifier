@@ -8,7 +8,7 @@ Run an executable file for your system. Just find the appropriate file in the `e
 - windows/386
 - darwin/amd64
 
-Find your Extra Life Team ID in the URL of your ![](https://i.imgur.com/ibu50IB.png)
+Find your Extra Life Team ID in the URL of your team page: ![](https://i.imgur.com/ibu50IB.png)
 
 Follow the instructions in [this article](https://slack.com/intl/en-ca/help/articles/115005265063-incoming-webhooks-for-slack) to create a Slack Incoming Webhook URL.
 
