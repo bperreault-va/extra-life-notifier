@@ -4,7 +4,7 @@ Extra Life Notifier will ping your slack or discord channel whenever a member of
 
 ## Executable
 
-Run an executable file for your system. Supports:
+Run an executable file for your system. Just find the appropriate file in the `exec` folder. Supports:
 - windows/386
 - darwin/amd64
 
