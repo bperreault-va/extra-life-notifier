@@ -12,9 +12,9 @@ import (
 )
 
 const (
-	GetTeamURL                        = "https://extra-life.org/api/teams/%s"
-	GetParticipantsURL                = "https://extra-life.org/api/teams/%s/participants"
-	GetDonationsURL                   = "https://extra-life.org/api/teams/%s/donations?limit=5"
+	GetTeamURL                        = "https://extralife.donordrive.com/api/teams/%s"
+	GetParticipantsURL                = "https://extralife.donordrive.com/api/teams/%s/participants"
+	GetDonationsURL                   = "https://extralife.donordrive.com/api/teams/%s/donations?limit=5"
 	DonationMessageTemplate           = "%s just received a $%.2f donation from %s!"
 	DonationAdditionalMessageTemplate = "\n> %s"
 	DonationTeamTotalTemplate         = "\nNew team total: $%.2f"
