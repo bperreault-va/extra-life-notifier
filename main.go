@@ -2,16 +2,15 @@ package main
 
 import (
 	"fmt"
-	"github.com/bperreault-va/extra-life-notifier/discord"
-	"github.com/bperreault-va/extra-life-notifier/extralife"
-	"github.com/bperreault-va/extra-life-notifier/slack"
+	"github.com/branson-perreault/extra-life-notifier/discord"
+	"github.com/branson-perreault/extra-life-notifier/extralife"
+	"github.com/branson-perreault/extra-life-notifier/slack"
 	"net/http"
 )
 
 func main() {
 	fmt.Println("Starting HTTP server...")
 	handleHTTP()
-
 
 	teamID := "CHANGE ME"
 	slackWebhookURL := "CHANGE ME OR LEAVE BLANK"
@@ -21,7 +20,12 @@ func main() {
 	discordService := discord.New(discordWebhookURL)
 	s := extralife.New(teamID, slackService, discordService)
 
-	fmt.Println("Starting Slack server...")
+	err := testMessaging(slackService, discordService)
+	if err != nil {
+		fmt.Println("Shutting down")
+		return
+	}
+	fmt.Println("Polling extra-life.org...")
 	s.PollExtraLife()
 }
 
@@ -47,4 +51,30 @@ func handleHTTP() {
 			panic(err.Error())
 		}
 	}()
+}
+
+func testMessaging(slackService slack.Service, discordService discord.Service) error {
+	fmt.Println("  Testing Slack server...")
+	if slackService.IsConfigured() {
+		err := slackService.SendMessage("  Restarting Slack server...")
+		if err != nil {
+			fmt.Println(fmt.Sprintf("    Slack test failure: %s", err.Error()))
+			return err
+		}
+		fmt.Println("    Slack test success!")
+	} else {
+		fmt.Println("    Slack is not configured. Skipping.")
+	}
+	fmt.Println("  Testing Discord server...")
+	if discordService.IsConfigured() {
+		err := discordService.SendMessage("  Restarting Discord server...")
+		if err != nil {
+			fmt.Println(fmt.Sprintf("    Discord test failure: %s", err.Error()))
+			return err
+		}
+		fmt.Println("    Discord test success!")
+	} else {
+		fmt.Println("    Discord is not configured. Skipping.")
+	}
+	return nil
 }

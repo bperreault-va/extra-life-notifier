@@ -9,12 +9,12 @@ import (
 )
 
 type service struct {
-	webhookUrl string
+	webhookURL string
 }
 
-func New(webhookUrl string) Service {
+func New(webhookURL string) Service {
 	return &service{
-		webhookUrl: webhookUrl,
+		webhookURL: webhookURL,
 	}
 }
 
@@ -22,7 +22,11 @@ type slackMessage struct {
 	Text string `json:"text"`
 }
 
-func (s *service) SendSlackMessage(message string) error {
+func (s *service) IsConfigured() bool {
+	return s.webhookURL != ""
+}
+
+func (s *service) SendMessage(message string) error {
 
 	fmt.Println(message)
 	slacktivity := slackMessage{Text: message}
@@ -32,7 +36,7 @@ func (s *service) SendSlackMessage(message string) error {
 	}
 	data := url.Values{}
 	data.Add("payload", string(payload))
-	resp, err := http.PostForm(s.webhookUrl, data)
+	resp, err := http.PostForm(s.webhookURL, data)
 	if err != nil {
 		return err
 	}
@@ -42,7 +46,7 @@ func (s *service) SendSlackMessage(message string) error {
 	return nil
 }
 
-func (s *service) SendTestSlacktivity() error {
+func (s *service) SendTestMessage() error {
 	payload, err := json.Marshal(slackMessage{Text: "Starting server..."})
 	if err != nil {
 		return err
@@ -50,7 +54,7 @@ func (s *service) SendTestSlacktivity() error {
 
 	data := url.Values{}
 	data.Add("payload", string(payload))
-	resp, err := http.PostForm(s.webhookUrl, data)
+	resp, err := http.PostForm(s.webhookURL, data)
 	if err != nil {
 		return err
 	}

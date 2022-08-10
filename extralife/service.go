@@ -3,8 +3,8 @@ package extralife
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/bperreault-va/extra-life-notifier/discord"
-	"github.com/bperreault-va/extra-life-notifier/slack"
+	"github.com/branson-perreault/extra-life-notifier/discord"
+	"github.com/branson-perreault/extra-life-notifier/slack"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -12,13 +12,13 @@ import (
 )
 
 const (
-	GetTeamURL                        = "https://extralife.donordrive.com/api/teams/%s"
-	GetParticipantsURL                = "https://extralife.donordrive.com/api/teams/%s/participants"
-	GetDonationsURL                   = "https://extralife.donordrive.com/api/teams/%s/donations?limit=5"
-	DonationMessageTemplate           = "%s just received a $%.2f donation from %s!"
+	GetTeamURL                        = "https://www.extra-life.org/api/teams/%s"
+	GetParticipantsURL                = "https://www.extra-life.org/api/teams/%s/participants"
+	GetDonationsURL                   = "https://www.extra-life.org/api/teams/%s/donations?limit=5"
+	DonationMessageTemplate           = "%s just received a $%.2f USD donation from %s! 💸"
 	DonationAdditionalMessageTemplate = "\n> %s"
-	DonationTeamTotalTemplate         = "\nNew team total: $%.2f"
-	ParticipantMessageTemplate        = "%s joined the team!"
+	DonationTeamTotalTemplate         = "\nNew team total: $%.2f USD 💸"
+	ParticipantMessageTemplate        = "%s joined the team! 🎉"
 	TimeLayout                        = "2006-01-02T15:04:05"
 	WaitDuration                      = 60 * time.Second
 )
@@ -43,28 +43,28 @@ func (s *extralifeService) PollExtraLife() {
 	for {
 		participants, err = s.GetParticipants()
 		if err != nil {
-			fmt.Println(err.Error())
+			fmt.Println(fmt.Sprintf("Error getting participants: %s", err.Error()))
 		}
 		for _, participant := range participants {
 			created, err := time.Parse(TimeLayout, strings.Split(participant.Created, ".")[0])
 			if err != nil {
-				fmt.Println(err.Error())
+				fmt.Println(fmt.Sprintf("Error parsing participant time: %s", err.Error()))
 			}
 			if created.After(time.Now().UTC().Add(-WaitDuration)) {
 				err := s.SendParticipantMessage(participant)
 				if err != nil {
-					fmt.Println(err.Error())
+					fmt.Println(fmt.Sprintf("Error sending participant message: %s", err.Error()))
 				}
 			}
 		}
 		donations, err := s.GetRecentDonations()
 		if err != nil {
-			fmt.Println(err.Error())
+			fmt.Println(fmt.Sprintf("Error getting recent donations: %s", err.Error()))
 		}
 		for _, donation := range donations {
 			created, err := time.Parse(TimeLayout, strings.Split(donation.Created, ".")[0])
 			if err != nil {
-				fmt.Println(err.Error())
+				fmt.Println(fmt.Sprintf("Error parsing donation time: %s", err.Error()))
 			}
 			if created.Before(time.Now().UTC().Add(-WaitDuration)) {
 				continue
@@ -73,12 +73,12 @@ func (s *extralifeService) PollExtraLife() {
 				if p.ParticipantID == donation.ParticipantID {
 					team, err := s.GetTeam()
 					if err != nil {
-						fmt.Println(err.Error())
+						fmt.Println(fmt.Sprintf("Error getting team: %s", err.Error()))
 					}
 
 					err = s.SendDonationMessage(team, donation, p)
 					if err != nil {
-						fmt.Println(err.Error())
+						fmt.Println(fmt.Sprintf("Error sending donation message: %s", err.Error()))
 					}
 
 				}
@@ -130,7 +130,7 @@ func (s *extralifeService) GetParticipants() ([]Participant, error) {
 		return nil, err
 	}
 	var participants []Participant
-	err = json.Unmarshal([]byte(response), &participants)
+	err = json.Unmarshal(response, &participants)
 	if err != nil {
 		return nil, err
 	}
@@ -156,7 +156,7 @@ func (s *extralifeService) GetRecentDonations() ([]Donation, error) {
 		return nil, err
 	}
 	var donations []Donation
-	err = json.Unmarshal([]byte(response), &donations)
+	err = json.Unmarshal(response, &donations)
 	if err != nil {
 		return nil, err
 	}
@@ -170,14 +170,14 @@ func (s *extralifeService) SendDonationMessage(team Team, donation Donation, par
 	}
 	message += fmt.Sprintf(DonationTeamTotalTemplate, team.SumDonations)
 
-	if s.slackService != nil {
-		err := s.slackService.SendSlackMessage(message)
+	if s.slackService.IsConfigured() {
+		err := s.slackService.SendMessage(message)
 		if err != nil {
 			return err
 		}
 	}
 
-	if s.discordService != nil {
+	if s.discordService.IsConfigured() {
 		err := s.discordService.SendMessage(message)
 		if err != nil {
 			return err
@@ -189,9 +189,17 @@ func (s *extralifeService) SendDonationMessage(team Team, donation Donation, par
 func (s *extralifeService) SendParticipantMessage(participant Participant) error {
 	message := fmt.Sprintf(ParticipantMessageTemplate, participant.DisplayName)
 
-	err := s.slackService.SendSlackMessage(message)
-	if err != nil {
-		return err
+	if s.slackService.IsConfigured() {
+		err := s.slackService.SendMessage(message)
+		if err != nil {
+			return err
+		}
+	}
+	if s.discordService.IsConfigured() {
+		err := s.discordService.SendMessage(message)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

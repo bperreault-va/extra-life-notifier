@@ -1,6 +1,7 @@
 package slack
 
 type Service interface {
-	SendSlackMessage(message string) error
-	SendTestSlacktivity() error
+	IsConfigured() bool
+	SendMessage(message string) error
+	SendTestMessage() error
 }

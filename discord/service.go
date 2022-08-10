@@ -19,8 +19,8 @@ func New(webhookURL string) Service {
 	}
 }
 
-type discordMessage struct {
-	Content string `json:"content"`
+func (s *service) IsConfigured() bool {
+	return s.webhookURL != ""
 }
 
 func (s *service) SendTestMessage() error {

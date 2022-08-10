@@ -4,9 +4,9 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"github.com/bperreault-va/extra-life-notifier/discord"
-	"github.com/bperreault-va/extra-life-notifier/extralife"
-	"github.com/bperreault-va/extra-life-notifier/slack"
+	"github.com/branson-perreault/extra-life-notifier/discord"
+	"github.com/branson-perreault/extra-life-notifier/extralife"
+	"github.com/branson-perreault/extra-life-notifier/slack"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -54,14 +54,8 @@ func main() {
 		}
 	}
 
-	var slackService slack.Service
-	var discordService discord.Service
-	if config.SlackWebhookURL != "" {
-		slackService = slack.New(config.SlackWebhookURL)
-	}
-	if config.DiscordWebhookURL != "" {
-		discordService = discord.New(config.DiscordWebhookURL)
-	}
+	slackService := slack.New(config.SlackWebhookURL)
+	discordService := discord.New(config.DiscordWebhookURL)
 	extraLifeService := extralife.New(config.TeamID, slackService, discordService)
 
 	var slackTeam extralife.Team
@@ -76,9 +70,9 @@ func main() {
 	}
 	fmt.Println(fmt.Sprintf("Slack Team name: %s", slackTeam.Name))
 
-	if slackService != nil {
+	if slackService.IsConfigured() {
 		fmt.Println("Testing Slack Incoming Webhook URL...")
-		err = slackService.SendTestSlacktivity()
+		err = slackService.SendTestMessage()
 		if err != nil {
 			fmt.Println(fmt.Sprintf("Testing Slack Incoming Webhook URL failed with the following status: %s", err.Error()))
 			_, err = reader.ReadString('\n')
@@ -86,7 +80,7 @@ func main() {
 		}
 	}
 
-	if discordService != nil {
+	if discordService.IsConfigured() {
 		fmt.Println("Testing Discord Incoming Webhook URL...")
 		err = discordService.SendTestMessage()
 		if err != nil {
